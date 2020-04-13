@@ -11,12 +11,24 @@ schedule_url = 'https://nba.hupu.com/schedule/'
 
 def get_schedule(date):
     # e.g. date='2020-03-01'
+    def check_data(players_table):
+        if players_table is None:
+            return False
+
+        day = players_table.find('tr', {'class': 'left linglei'}).get_text().strip()[3:5]
+        if day != date.split('-')[2]:
+            # 验证期望的date与抓取到的game_date是否一致
+            return False
+
+        return True
     
     url = schedule_url + date
-
     html = urlopen(url)
     soup = BeautifulSoup(html, features='lxml')
     players_table = soup.find("table", {"class": "players_table"})
+    if not check_data(players_table):
+        print(date + ' 当天没有比赛，跳过')
+        return None
     
     game_date = None
     schedule = []
@@ -25,11 +37,6 @@ def get_schedule(date):
             if game_date:
                 break
             game_date = tr.get_text().strip()
-            # 验证期望的date与抓取到的game_date是否一致
-            if game_date.split('月')[0] != date.split('-')[1] or game_date.split('月')[1].split('日')[0] != date.split('-')[2]:
-                print(date + ' 当天没有比赛，跳过')
-                return None
-
         else:
             td_list = tr.find_all("td")
             game_time = date + ' ' + td_list[0].get_text()
