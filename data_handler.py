@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/04/18 21:30
+# @Author  : jyz
+# @FileName: data_handler.py
+# @description: 数据清洗
+
 team_map = {
     # 西部赛区
     "火箭": "HOU", "独行侠": "DAL", "灰熊": "MEM", "鹈鹕": "NOP", "鹈鹕": "NOP", "马刺": "SAS",

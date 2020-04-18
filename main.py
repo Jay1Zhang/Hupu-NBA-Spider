@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/04/18 21:30
 # @Author  : jyz
-# @FileName: .py
+# @FileName: main.py
 # @description: 调用者只需关注该类即可
 
 import datetime
@@ -15,14 +15,19 @@ from mysql_updater import init_mysql, schedule2mysql
 """
     定义给外部的接口函数
 """
-def spider_today():
+def update_dates(dates):
+    schedule_spider(dates)
+    schedule2mysql(dates)
+
+
+def update_today():
     today = str(datetime.date.today())
     print(today)
     schedule_spider([today])
     schedule2mysql([today])
 
 
-def spider_all():
+def init_all():
     # 爬取队伍数据
     team_spider()
     # 爬取比赛数据
@@ -33,5 +38,6 @@ def spider_all():
 
 
 if __name__ == "__main__":
-    #spider_all()
-    spider_today()
+    #init_all()
+    #update_today()
+    update_dates(['2019-02-21'])

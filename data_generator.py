@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/04/18 21:30
+# @Author  : jyz
+# @FileName: data_generator.py
+# @description: 初始化数据生成器
+
 import arrow
 
 def gen_dates_by_year(year):

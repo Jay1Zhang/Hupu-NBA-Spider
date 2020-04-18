@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/04/18 21:30
+# @Author  : jyz
+# @FileName: test_spider.py
+# @description: 测试爬虫
+
 from schedule_spider import schedule_spider
 
 # '2019-02-21'   '2019-10-04'

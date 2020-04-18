@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/04/18 21:30
+# @Author  : jyz
+# @FileName: schedule_spider.py
+# @description: 爬取所有赛程相关信息
+
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import pandas as pd
@@ -85,7 +91,7 @@ def schedule_spider(dates):
         all_schedule += schedule                
 
         for game in schedule:
-            print(game['gameId'], game['gameTime'], game['gameTeam'], game['gameOver'])
+            print('[schedule_spider]', game['gameId'], game['gameTime'], game['gameTeam'], game['gameOver'])
             game_spider(path=path + date + '/', game=game)
         
     df = pd.DataFrame(all_schedule)

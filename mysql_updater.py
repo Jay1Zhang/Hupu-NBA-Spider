@@ -1,13 +1,21 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/04/18 21:30
+# @Author  : jyz
+# @FileName: mysql_updater.py
+# @description: 将爬到本地的数据更新到MySQL
+
 import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime
 from sqlalchemy.types import NVARCHAR, Float, Integer, Text
 
-"""
-    将爬到本地的数据更新到MySQL
-"""
 
-engine = create_engine('mysql+pymysql://root:king33++@127.0.0.1/project_Hupu')
+username = 'root'
+password = 'ur_password'
+database = 'project_Hupu'
+
+engine = create_engine('mysql+pymysql://' + username + ':' + password + '@127.0.0.1/' + database)
+#engine = create_engine('mysql+pymysql://root:password@127.0.0.1/project_Hupu')
 # 建立连接
 con = engine.connect()
 

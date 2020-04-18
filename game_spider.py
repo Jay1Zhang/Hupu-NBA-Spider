@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/04/18 21:30
+# @Author  : jyz
+# @FileName: game_spider.py
+# @description: 爬取比赛相关信息
+
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 from urllib.request import urlretrieve
