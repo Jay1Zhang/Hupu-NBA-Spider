@@ -78,8 +78,11 @@
   - 比赛得分信息：
   - 双方技术统计：客队技术统计，主队技术统计，这里也仅存ID，作为外键，以链接stats表。
 
-- score
+- team_score_stats
 
+  - id
+  - teamId
+  - isHome boolean
   - 
 
 - stats

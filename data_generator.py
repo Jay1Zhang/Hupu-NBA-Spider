@@ -14,7 +14,8 @@ def gen_dates_by_year(year):
         i += 1
         
     return dates
+    
 
 if __name__ == "__main__":
     date = gen_dates_by_year(2019)
-    print(date[100:])
+    #print(date[100:])

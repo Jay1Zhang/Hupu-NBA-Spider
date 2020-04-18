@@ -5,6 +5,8 @@ import pandas as pd
 import re
 import os
 
+from data_handler import map_team, format_player_stats
+
 
 def get_game_pros():
     # 尚未开始的比赛，比赛前瞻
@@ -24,19 +26,23 @@ def get_game_base_info(game, game_id):
     return pd.DataFrame([base_info])
 
     
-def get_game_score_info(game):
-    def _get_team_score_info(is_home_team):
-        # 获取球队基本信息
-        team_id = 'team_b' if is_home_team else 'team_a'
-        team = game.find('div', {'class': team_id})
+def get_team_score_stats(game, gameId):
+    def _get_team_score_stats(is_home_team):
+        # 生成唯一id
+        label = '1' if is_home_team else '0'
+        stats_id = gameId + label
+        # 获取球队id
+        label = 'team_b' if is_home_team else 'team_a'
+        team = game.find('div', {'class': label})
 
-        name = team.find('p').get_text().strip()
-        msg = team.find('div', {'class': 'message'}).find('div').get_text().strip()
-        link = team.find('p').a['href']
+        teamId = map_team(team.find('p').get_text().strip())
+        #name = team.find('p').get_text().strip()
+        #msg = team.find('div', {'class': 'message'}).find('div').get_text().strip()
+        #link = team.find('p').a['href']
 
-        # 获取比分情况
-        team_id = 'home_score' if is_home_team else 'away_score'
-        score_tag = game.find('tr', {'class': 'away_score'}).find_all('td')
+        # 获取得分情况
+        label = 'home_score' if is_home_team else 'away_score'
+        score_tag = game.find('tr', {'class': label}).find_all('td')
         if len(score_tag) < 6:
             # 缺失数据
             score1, score2, score3, score4, score = None, None, None, None, None
@@ -47,16 +53,45 @@ def get_game_score_info(game):
             score4 = score_tag[4].get_text().strip()
             score = score_tag[5].get_text().strip()
 
-        return {'队名': name, '基本信息': msg, 
-                 '一': score1, '二': score2, '三': score3, '四': score4, '总分': score,
-                 '球队链接': link, }
+        return {'id': stats_id, 'teamId': teamId, 'gameId': gameId, 'isHome': int(is_home_team),  
+                'score1': score1, 'score2': score2, 'score3': score3, 'score4': score4, 'score': score}
 
-    away_team = _get_team_score_info(is_home_team=False)
-    home_team = _get_team_score_info(is_home_team=True)
+    away_team = _get_team_score_stats(is_home_team=False)
+    home_team = _get_team_score_stats(is_home_team=True)
     
     return pd.DataFrame([away_team, home_team])
 
 
+def get_player_score_stats(game, gameId):
+    def _get_player_score_stats(is_home_team):
+        # 生成唯一id
+        label = '1' if is_home_team else '0'
+        teamStatsId = gameId + label
+        # 获取球队id
+        label = 'team_b' if is_home_team else 'team_a'
+        team = game.find('div', {'class': label})
+        teamId = map_team(team.find('p').get_text().strip())
+
+        # 获取详细的球员数据
+        label = 'J_home_content' if is_home_team else 'J_away_content'
+    
+        table = []
+        for tr in game.find('table', {'id': label}).find_all('tr'):
+            line = [td.get_text().strip() for td in tr.find_all('td')]
+            line.insert(0, teamStatsId)
+            line.insert(0, teamId)
+            table.append(line)
+        
+        df = pd.DataFrame(table)
+        df = format_player_stats(df, teamStatsId)
+        return df
+
+    away_team = _get_player_score_stats(is_home_team=False)
+    home_team = _get_player_score_stats(is_home_team=True)
+    
+    return pd.concat([away_team, home_team])
+
+"""
 def get_team_score_table(game, is_home_team):
     team_id = 'J_home_content' if is_home_team else 'J_away_content'
     
@@ -68,7 +103,7 @@ def get_team_score_table(game, is_home_team):
     df = pd.DataFrame(table)
     df.iloc[0,1] = "位置"
     return df
-
+"""
 
 def get_game_recap(game):
     recap_url = game.find('a', {'class': 'a', 'target': '_self'})['href']
@@ -86,7 +121,7 @@ def get_game_recap(game):
         print('\tThere was no report of the game.')
         return None
     else:
-        return pd.DataFrame([{'标题': header, '内容': content, '更新时间': upd_time, '精彩瞬间': img_url}])
+        return pd.DataFrame([{'header': header, 'content': content, 'updTime': upd_time, 'capture': img_url}])
 
 
 def get_game_data(game_id):
@@ -99,17 +134,19 @@ def get_game_data(game_id):
     
     game = soup.find('div', {'class': 'gamecenter_content_l'})
     game_base_info = get_game_base_info(game, game_id)
-    game_score_info = get_game_score_info(game)
-    away_team_score_table = get_team_score_table(game, is_home_team=False)
-    home_team_score_table = get_team_score_table(game, is_home_team=True)
+    team_score_stats = get_team_score_stats(game, game_id)
+    player_score_stats = get_player_score_stats(game, game_id)
+    #away_team_score_table = get_team_score_table(game, is_home_team=False)
+    #home_team_score_table = get_team_score_table(game, is_home_team=True)
     game_recap = get_game_recap(game)
 
-    return game_base_info, game_score_info, away_team_score_table, home_team_score_table, game_recap
+    return game_base_info, team_score_stats, player_score_stats, game_recap
 
 
 def write_game_data(path, dir_name, 
-                    game_base_info, game_score_info, 
-                    away_team_score_table, home_team_score_table,
+                    game_base_info, 
+                    team_score_stats, 
+                    player_score_stats,
                     game_recap):
     try:
         os.mkdir(path + dir_name)
@@ -117,9 +154,10 @@ def write_game_data(path, dir_name,
         print('\tWarning! Game-folder \'' + path + dir_name + '\' already exists, and data will be overwritten.')
     
     game_base_info.to_csv(path + dir_name + '/game_base_info.csv', index=False, header=True)
-    game_score_info.to_csv(path + dir_name + '/game_score_info.csv', index=False, header=True)
-    away_team_score_table.to_csv(path + dir_name + '/away_team_score_table.csv', index=False, header=False)
-    home_team_score_table.to_csv(path + dir_name + '/home_team_score_table.csv', index=False, header=False)
+    team_score_stats.to_csv(path + dir_name + '/team_score_stats.csv', index=False, header=True)
+    player_score_stats.to_csv(path + dir_name + '/player_score_stats.csv', index=False, header=True)
+    #away_team_score_table.to_csv(path + dir_name + '/away_team_score_table.csv', index=False, header=False)
+    #home_team_score_table.to_csv(path + dir_name + '/home_team_score_table.csv', index=False, header=False)
     if game_recap is not None:
         game_recap.to_csv(path + dir_name + '/game_recap.csv', index=False)
         #urlretrieve(game_recap.loc[0, '精彩瞬间'], path + dir_name + '/capture.jpg')
@@ -128,9 +166,9 @@ def write_game_data(path, dir_name,
 def game_spider(path, game):
     if game['gameOver']:
         # 比赛已经结束, 做技术统计
-        base, score, away, home, recap = get_game_data(game['gameId'])
+        base, team_score, player_score, recap = get_game_data(game['gameId'])
         write_game_data(path, game['gameTeam'], 
-                        base, score, away, home, recap)
+                        base, team_score, player_score, recap)
     else:
         # 比赛尚未开始，做比赛前瞻
         pass   
