@@ -17,7 +17,7 @@ stats_title_map = {
     0: 'teamId', 1: 'teamStatsId', 
     2: 'playerName', 3: 'position', 4: 'playMinute', 
     5: 'shot', 6: 'threeShot', 7: 'penaltyShot', 8: 'frontCourt', 9: 'backCourt', 10: 'rebound', 
-    11: 'assist', 12: 'foul', 13: 'steal', 14: 'fault', 15: 'block', 16: 'score', 17: '+/-'
+    11: 'assist', 12: 'foul', 13: 'steal', 14: 'fault', 15: 'block', 16: 'score', 17: 'Contribution'
 }
 
 

@@ -105,7 +105,7 @@ def get_team_score_table(game, is_home_team):
     return df
 """
 
-def get_game_recap(game):
+def get_game_recap(game, game_id):
     recap_url = game.find('a', {'class': 'a', 'target': '_self'})['href']
     html = urlopen(recap_url)
     soup = BeautifulSoup(html, features='lxml')
@@ -121,7 +121,7 @@ def get_game_recap(game):
         print('\tThere was no report of the game.')
         return None
     else:
-        return pd.DataFrame([{'header': header, 'content': content, 'updTime': upd_time, 'capture': img_url}])
+        return pd.DataFrame([{'gameId': game_id, 'header': header, 'content': content, 'updTime': upd_time, 'capture': img_url}])
 
 
 def get_game_data(game_id):
@@ -138,7 +138,7 @@ def get_game_data(game_id):
     player_score_stats = get_player_score_stats(game, game_id)
     #away_team_score_table = get_team_score_table(game, is_home_team=False)
     #home_team_score_table = get_team_score_table(game, is_home_team=True)
-    game_recap = get_game_recap(game)
+    game_recap = get_game_recap(game, game_id)
 
     return game_base_info, team_score_stats, player_score_stats, game_recap
 
