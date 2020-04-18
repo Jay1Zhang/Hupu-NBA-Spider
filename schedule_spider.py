@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 from data_generator import gen_dates_by_year
-from data_handler import map_teams
+from data_handler import map_team_vs_team
 from game_spider import game_spider
 
 
@@ -29,7 +29,7 @@ def get_schedule(date):
     soup = BeautifulSoup(html, features='lxml')
     players_table = soup.find("table", {"class": "players_table"})
     if not check_data(players_table):
-        print('There were no games on ' + date + ', skip.')
+        print('[get_schedule] There were no games on ' + date + ', skip.')
         return None
     
     game_date = None
@@ -43,7 +43,7 @@ def get_schedule(date):
             td_list = tr.find_all("td")
             game_time = date + ' ' + td_list[0].get_text()
             game_team = td_list[1].get_text()
-            game_team = map_teams("".join(game_team.split()))
+            game_team = map_team_vs_team("".join(game_team.split()))
             # 遇到某些已被剔除的球队，直接跳过，如 2019-02-21 北卡vs杜克
             if game_team is None:
                 continue
@@ -67,7 +67,7 @@ def write_schedule(schedule, date, path='./data/games/'):
     try:
         os.mkdir(path + date)
     except:
-        print('\nWarning! Schedule-folder \'' + path + date + '\' already exists, and data will be overwritten.')
+        print('\n[write_schedule] Warning! Schedule-folder \'' + path + date + '\' already exists, and data will be overwritten.')
     
     df = pd.DataFrame(schedule)
     df.to_csv(path + date + '/' + date + '-schedule.csv', index=False)
@@ -89,11 +89,14 @@ def schedule_spider(dates):
             game_spider(path=path + date + '/', game=game)
         
     df = pd.DataFrame(all_schedule)
-    df.to_csv(path + 'all_schedule.csv', index=False)    # 写入所有赛程信息
+    if os.path.isfile(path + 'all_schedule.csv'):
+        df.to_csv(path + 'all_schedule.csv', index=False, header=False, mode='a')    # 补充写入
+    else:
+        df.to_csv(path + 'all_schedule.csv', index=False, header=True)    # 写入所有赛程信息
 
 
 def main():
-    schedule_spider(gen_dates_by_year(2019)[300:])
+    schedule_spider(gen_dates_by_year(2019)[364:])
 
 
 if __name__ == "__main__":

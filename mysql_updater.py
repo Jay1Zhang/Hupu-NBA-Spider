@@ -3,7 +3,10 @@ from sqlalchemy import create_engine
 from datetime import datetime
 from sqlalchemy.types import NVARCHAR, Float, Integer, Text
 
-# 连接设置 连接mysql 用户名ffzs 密码666 地址localhost：3306 database：stock
+"""
+    将爬到本地的数据更新到MySQL
+"""
+
 engine = create_engine('mysql+pymysql://root:king33++@127.0.0.1/project_Hupu')
 # 建立连接
 con = engine.connect()
@@ -52,27 +55,53 @@ def game2mysql(path):
     try:
         game_recap = pd.read_csv(path + 'game_recap.csv')
     except:
-        print('There was no game_recap in folder \'' + path + '\', skip.')
+        print('[game2mysql] There was no game_recap in folder \'' + path + '\', skip.')
     else:
         recap2mysql(game_recap)
 
 """
     将指定日期的所有比赛数据更新到MySQL
 """
-def schedule2mysql(date):
-    path = './data/games/' + date + '/'
-    schedule = pd.read_csv(path + date + '-schedule.csv')
+def schedule2mysql(dates):
+    for date in dates:
+        path = './data/games/' + date + '/'
+        try:
+            schedule = pd.read_csv(path + date + '-schedule.csv')
+        except:
+            print('[schedule2mysql] There were no games on ' + date + ', skip.')
+        else:
+            for i in range(0, len(schedule)):
+                gameTeam = schedule.iloc[i]['gameTeam']
+                filepath = path + gameTeam + '/'
+                print(filepath)
+                game2mysql(filepath)
 
-    for i in range(0, len(schedule)):
-        gameTeam = schedule.iloc[i]['gameTeam']
-        filepath = path + gameTeam + '/'
-        print(filepath)
-        game2mysql(filepath)
+
+def team2mysql():
+    teams = pd.read_csv('./data/teams/teams.csv')
+
+    dtype_dict = {}
+    for i, j in zip(teams.columns, teams.dtypes):
+        if "object" in str(j):
+            dtype_dict.update({i: NVARCHAR(length=32)})
+        if "float" in str(j):
+            dtype_dict.update({i: Float(precision=2, asdecimal=True)})
+        if "int" in str(j):
+            dtype_dict.update({i: Integer()})
+    
+    dtype_dict.update({'logoUrl': NVARCHAR(length=64), 'website': NVARCHAR(length=64), 'description': Text()})
+    print(dtype_dict)
+    # 通过dtype设置类型 为dict格式{“col_name”:type}
+    teams.to_sql(name='team', con=con, if_exists='replace', index=False, dtype=dtype_dict)
+
 
 """
     初始化MySQL数据库，保证在数据库为空时执行且仅执行一次。
 """
 def init_mysql():
+    # 初始化队伍数据
+    team2mysql()
+    # 初始化比赛数据
     path = './data/games/'
     all_schedule = pd.read_csv(path + 'all_schedule.csv')
 
@@ -87,5 +116,6 @@ def init_mysql():
 if __name__ == "__main__":
     #path = './data/games/2019-12-22/ATLvsBKN/'
     #game2mysql(path)
+    #team2mysql()
     #init_mysql()
-    schedule2mysql('2019-12-30')
+    schedule2mysql(['2019-12-30', '2019-12-31'])

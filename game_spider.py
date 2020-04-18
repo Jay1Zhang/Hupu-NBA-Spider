@@ -118,7 +118,7 @@ def get_game_recap(game, game_id):
         
         img_url = recap.find('img')['src']
     except:
-        print('\tThere was no report of the game.')
+        print('\t[get_game_recap] There was no report of the game.')
         return None
     else:
         return pd.DataFrame([{'gameId': game_id, 'header': header, 'content': content, 'updTime': upd_time, 'capture': img_url}])
@@ -151,7 +151,7 @@ def write_game_data(path, dir_name,
     try:
         os.mkdir(path + dir_name)
     except:
-        print('\tWarning! Game-folder \'' + path + dir_name + '\' already exists, and data will be overwritten.')
+        print('\t[write_game_data] Warning! Game-folder \'' + path + dir_name + '\' already exists, and data will be overwritten.')
     
     game_base_info.to_csv(path + dir_name + '/game_base_info.csv', index=False, header=True)
     team_score_stats.to_csv(path + dir_name + '/team_score_stats.csv', index=False, header=True)

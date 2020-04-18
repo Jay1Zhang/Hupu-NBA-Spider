@@ -21,7 +21,7 @@ stats_title_map = {
 }
 
 
-def map_teams(team_str):
+def map_team_vs_team(team_str):
     # 检查赛程信息中的球队是否存在于map表中
     team_a = team_str.split("vs")[0]
     team_b = team_str.split("vs")[1]
