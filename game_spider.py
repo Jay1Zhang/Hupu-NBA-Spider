@@ -14,13 +14,13 @@ def get_game_pros():
 def get_game_base_info(game):
     game_base_info = game.find('div', {'class': 'about_fonts clearfix'})
     
-    time_f = game_base_info.find('p', {'class': 'time_f'}).get_text().split('：')
-    consumTime = game_base_info.find('p', {'class': 'consumTime'}).get_text().split('：')
-    arena = game_base_info.find('p', {'class': 'arena'}).get_text().split('：')
-    peopleNum = game_base_info.find('p', {'class': 'peopleNum'}).get_text().split('：')
+    gameTime = game_base_info.find('p', {'class': 'time_f'}).get_text().split('：')[1]
+    consumTime = game_base_info.find('p', {'class': 'consumTime'}).get_text().split('：')[1]
+    arena = game_base_info.find('p', {'class': 'arena'}).get_text().split('：')[1]
+    peopleNum = game_base_info.find('p', {'class': 'peopleNum'}).get_text().split('：')[1]
     
-    df = pd.DataFrame([time_f, consumTime, arena, peopleNum])
-    return df.T
+    base_info = {'gameTime': gameTime, 'consumTime': consumTime, 'arena': arena, 'peopleNum': peopleNum}
+    return pd.DataFrame([base_info])
 
     
 def get_game_score_info(game):
@@ -82,7 +82,7 @@ def get_game_recap(game):
         
         img_url = recap.find('img')['src']
     except:
-        print('暂无该场比赛的战报')
+        print('\tThere was no report of the game.')
         return None
     else:
         return pd.DataFrame([{'标题': header, '内容': content, '更新时间': upd_time, '精彩瞬间': img_url}])
@@ -113,7 +113,8 @@ def write_game_data(path, dir_name,
     try:
         os.mkdir(path + dir_name)
     except:
-        print(path + dir_name + ' 文件夹已存在')
+        #print(path + dir_name + ' 文件夹已存在')
+        print('\tFolder \'' + path + dir_name + '\' already exists, and it cannot be created repeatedly.')
     else:
         game_base_info.to_csv(path + dir_name + '/game_base_info.csv', index=False, header=False)
         game_score_info.to_csv(path + dir_name + '/game_score_info.csv', index=False, header=True)
@@ -121,14 +122,14 @@ def write_game_data(path, dir_name,
         home_team_score_table.to_csv(path + dir_name + '/home_team_score_table.csv', index=False, header=False)
         if game_recap is not None:
             game_recap.to_csv(path + dir_name + '/game_recap.csv', index=False)
-            urlretrieve(game_recap.loc[0, '精彩瞬间'], path + dir_name + '/capture.jpg')
+            #urlretrieve(game_recap.loc[0, '精彩瞬间'], path + dir_name + '/capture.jpg')
         
 
 def game_spider(path, game):
-    if game['比赛结束']:
+    if game['gameover']:
         # 比赛已经结束, 做技术统计
-        base, score, away, home, recap = get_game_data(game['比赛数据'])
-        write_game_data(path, game['比赛队伍'], 
+        base, score, away, home, recap = get_game_data(game['gameid'])
+        write_game_data(path, game['gameteam'], 
                         base, score, away, home, recap)
     else:
         # 比赛尚未开始，做比赛前瞻
