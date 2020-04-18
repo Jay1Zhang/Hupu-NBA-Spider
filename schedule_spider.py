@@ -49,10 +49,10 @@ def get_schedule(date):
             game_data = td_list[2].a['href'].split('/')[-1]
             game_over = td_list[2].a.get_text() == '数据统计'
             
-            schedule.append({'gameid': game_data,
-                             'gametime': game_time, 
-                             'gameteam': game_team, 
-                             'gameover': game_over})
+            schedule.append({'gameId': game_data,
+                             'gameTime': game_time, 
+                             'gameTeam': game_team, 
+                             'gameOver': game_over})
     
     return schedule
 
@@ -64,10 +64,10 @@ def write_schedule(schedule, date, path='./data/games/'):
     try:
         os.mkdir(path + date)
     except:
-        print('Folder \'' + path + date + '\' already exists, and it cannot be created repeatedly.')
-    else:
-        df = pd.DataFrame(schedule)
-        df.to_csv(path + date + '/' + date + '-schedule.csv', index=False)
+        print('Warning! Schedule-folder \'' + path + date + '\' already exists, and data will be overwritten.')
+    
+    df = pd.DataFrame(schedule)
+    df.to_csv(path + date + '/' + date + '-schedule.csv', index=False)
 
 
 def schedule_spider(dates):
@@ -82,7 +82,7 @@ def schedule_spider(dates):
         all_schedule += schedule                
 
         for game in schedule:
-            print(game['gameid'], game['gametime'], game['gameteam'], game['gameover'])
+            print(game['gameId'], game['gameTime'], game['gameTeam'], game['gameOver'])
             game_spider(path=path + date + '/', game=game)
         
     df = pd.DataFrame(all_schedule)

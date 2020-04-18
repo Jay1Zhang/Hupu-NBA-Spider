@@ -11,7 +11,7 @@ def get_game_pros():
     pass
 
 
-def get_game_base_info(game):
+def get_game_base_info(game, game_id):
     game_base_info = game.find('div', {'class': 'about_fonts clearfix'})
     
     gameTime = game_base_info.find('p', {'class': 'time_f'}).get_text().split('：')[1]
@@ -19,7 +19,8 @@ def get_game_base_info(game):
     arena = game_base_info.find('p', {'class': 'arena'}).get_text().split('：')[1]
     peopleNum = game_base_info.find('p', {'class': 'peopleNum'}).get_text().split('：')[1]
     
-    base_info = {'gameTime': gameTime, 'consumTime': consumTime, 'arena': arena, 'peopleNum': peopleNum}
+    base_info = {'gameId': game_id, 'gameTime': gameTime, 
+                 'consumTime': consumTime, 'arena': arena, 'peopleNum': peopleNum}
     return pd.DataFrame([base_info])
 
     
@@ -97,7 +98,7 @@ def get_game_data(game_id):
     soup = BeautifulSoup(html, features='lxml')
     
     game = soup.find('div', {'class': 'gamecenter_content_l'})
-    game_base_info = get_game_base_info(game)
+    game_base_info = get_game_base_info(game, game_id)
     game_score_info = get_game_score_info(game)
     away_team_score_table = get_team_score_table(game, is_home_team=False)
     home_team_score_table = get_team_score_table(game, is_home_team=True)
@@ -113,23 +114,22 @@ def write_game_data(path, dir_name,
     try:
         os.mkdir(path + dir_name)
     except:
-        #print(path + dir_name + ' 文件夹已存在')
-        print('\tFolder \'' + path + dir_name + '\' already exists, and it cannot be created repeatedly.')
-    else:
-        game_base_info.to_csv(path + dir_name + '/game_base_info.csv', index=False, header=False)
-        game_score_info.to_csv(path + dir_name + '/game_score_info.csv', index=False, header=True)
-        away_team_score_table.to_csv(path + dir_name + '/away_team_score_table.csv', index=False, header=False)
-        home_team_score_table.to_csv(path + dir_name + '/home_team_score_table.csv', index=False, header=False)
-        if game_recap is not None:
-            game_recap.to_csv(path + dir_name + '/game_recap.csv', index=False)
-            #urlretrieve(game_recap.loc[0, '精彩瞬间'], path + dir_name + '/capture.jpg')
+        print('\tWarning! Game-folder \'' + path + dir_name + '\' already exists, and data will be overwritten.')
+    
+    game_base_info.to_csv(path + dir_name + '/game_base_info.csv', index=False, header=True)
+    game_score_info.to_csv(path + dir_name + '/game_score_info.csv', index=False, header=True)
+    away_team_score_table.to_csv(path + dir_name + '/away_team_score_table.csv', index=False, header=False)
+    home_team_score_table.to_csv(path + dir_name + '/home_team_score_table.csv', index=False, header=False)
+    if game_recap is not None:
+        game_recap.to_csv(path + dir_name + '/game_recap.csv', index=False)
+        #urlretrieve(game_recap.loc[0, '精彩瞬间'], path + dir_name + '/capture.jpg')
         
 
 def game_spider(path, game):
-    if game['gameover']:
+    if game['gameOver']:
         # 比赛已经结束, 做技术统计
-        base, score, away, home, recap = get_game_data(game['gameid'])
-        write_game_data(path, game['gameteam'], 
+        base, score, away, home, recap = get_game_data(game['gameId'])
+        write_game_data(path, game['gameTeam'], 
                         base, score, away, home, recap)
     else:
         # 比赛尚未开始，做比赛前瞻
