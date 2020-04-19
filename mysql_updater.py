@@ -4,15 +4,14 @@
 # @FileName: mysql_updater.py
 # @description: 将爬到本地的数据更新到MySQL
 
+import pymysql
 import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime
 from sqlalchemy.types import NVARCHAR, Float, Integer, Text
 
+from config import username, password, database
 
-username = 'root'
-password = 'ur_password'
-database = 'project_Hupu'
 
 engine = create_engine('mysql+pymysql://' + username + ':' + password + '@127.0.0.1/' + database)
 #engine = create_engine('mysql+pymysql://root:password@127.0.0.1/project_Hupu')
@@ -103,27 +102,48 @@ def team2mysql():
     teams.to_sql(name='team', con=con, if_exists='replace', index=False, dtype=dtype_dict)
 
 
-"""
-    初始化MySQL数据库，保证在数据库为空时执行且仅执行一次。
-"""
-def init_mysql():
-    # 初始化队伍数据
-    team2mysql()
-    # 初始化比赛数据
-    path = './data/games/'
-    all_schedule = pd.read_csv(path + 'all_schedule.csv')
+def clear_mysql():
+    # 打开数据库连接
+    db = pymysql.connect("localhost", username, password, database)
+    cursor = db.cursor()    # 使用cursor()方法获取操作游标 
+    try:
+        cursor.execute("drop table team")
+        cursor.execute("drop table game")
+        cursor.execute("drop table team_score_stats")
+        cursor.execute("drop player_score_stats team")
+        cursor.execute("drop table recap")
+        db.commit()
+        # print("Cleared tables in " + database)                  
+    except:
+        db.rollback()   # 发生错误时回滚
+    db.close()
 
-    for i in range(0, len(all_schedule)):
-        gameTime = all_schedule.iloc[i]['gameTime'].split(" ")[0]
-        gameTeam = all_schedule.iloc[i]['gameTeam']
-        filepath = path + gameTime + '/' + gameTeam + '/'
-        print(filepath)
-        game2mysql(filepath)
+
+def set_default_primary():
+    # 打开数据库连接
+    db = pymysql.connect("localhost", username, password, database)
+    cursor = db.cursor()    # 使用cursor()方法获取操作游标 
+    try:
+        # ALTER TABLE countryRiskLevel ADD PRIMARY KEY ( countrycd );
+        cursor.execute("ALTER TABLE team ADD PRIMARY KEY (teamId);")
+        cursor.execute("ALTER TABLE game ADD PRIMARY KEY (gameId);")
+        cursor.execute("ALTER TABLE team_score_stats ADD PRIMARY KEY (id);")
+        cursor.execute("ALTER TABLE player_score_stats ADD PRIMARY KEY (id);")
+        cursor.execute("ALTER TABLE recap ADD PRIMARY KEY (gameId);")
+
+        cursor.execute("drop table game")
+        cursor.execute("drop table team_score_stats")
+        cursor.execute("drop player_score_stats team")
+        cursor.execute("drop table recap")
+        db.commit()
+        # print("Cleared tables in " + database)                  
+    except:
+        db.rollback()   # 发生错误时回滚
+    db.close()
 
 
 if __name__ == "__main__":
     #path = './data/games/2019-12-22/ATLvsBKN/'
     #game2mysql(path)
     #team2mysql()
-    #init_mysql()
     schedule2mysql(['2019-12-30', '2019-12-31'])

@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import pandas as pd
 import os
+import random
+import time
 
 from data_generator import gen_dates_by_year
 from data_handler import map_team_vs_team
@@ -82,8 +84,20 @@ def write_schedule(schedule, date, path='./data/games/'):
 def schedule_spider(dates):
     path = './data/games/'
     all_schedule = []
+    cnt = 0
     for date in dates:
-        schedule = get_schedule(date=date)      # 获取赛程信息
+        """sleep"""
+        cnt += 1
+        if cnt == 30:
+            # 每爬取30天的赛程强行休息一分钟
+            cnt = 0
+            time.sleep(60)
+        # 随机一段时间休眠
+        sleep_time = round(random.random(),4)
+        time.sleep(sleep_time)
+        """sleep"""
+        # 获取赛程信息
+        schedule = get_schedule(date=date)      
         if schedule is None:
             continue
         

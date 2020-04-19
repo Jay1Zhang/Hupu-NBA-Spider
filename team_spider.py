@@ -4,6 +4,7 @@
 # @FileName: team_spider.py
 # @description: 爬取球队相关信息
 
+import os
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import pandas as pd
@@ -49,6 +50,11 @@ def write_team_data(team_data):
 
 
 def team_spider():
+    if os.path.exists('./data/teams/teams.csv'):
+        # 由于球队的基本信息不会改变，因此无需重复爬取
+        print('[team_spider] Teams data already exists, skip.')
+        return
+    
     url = 'https://nba.hupu.com/teams'
     html = urlopen(url)
     soup = BeautifulSoup(html, features='lxml')
