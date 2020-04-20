@@ -5,34 +5,17 @@
 # @description: 爬取所有赛程相关信息
 
 from bs4 import BeautifulSoup
-from selenium import webdriver
 from urllib.request import urlopen
 import pandas as pd
 import os
-import random
-import time
 
 from data_generator import gen_dates_by_year
 from data_handler import map_team_vs_team
 from game_spider import game_spider
+from anti_spider import get_html, sleep_random
 
 
-def get_schedule(date, use_selenium=False):
-    # 获取html源码
-    def get_html(date, use_selenium=False):
-        schedule_url = 'https://nba.hupu.com/schedule/'
-        url = schedule_url + date
-
-        if use_selenium:
-            driver = webdriver.Firefox()    # 打开浏览器
-            driver.get(url)     # 打开网页 - 知乎关键词检索后的网页
-            html = driver.page_source  # get html
-            driver.close()
-        else:
-            html = urlopen(url)
-
-        return html
-        
+def get_schedule(date):
     # e.g. date='2020-03-01'
     def check_data(players_table):
         if players_table is None:
@@ -45,7 +28,7 @@ def get_schedule(date, use_selenium=False):
 
         return True
     
-    html = get_html(date, use_selenium)
+    html = get_html(date)
     soup = BeautifulSoup(html, features='lxml')
     players_table = soup.find("table", {"class": "players_table"})
     if not check_data(players_table):
@@ -97,8 +80,9 @@ def schedule_spider(dates, use_selenium=False):
     path = './data/games/'
     all_schedule = []
     for date in dates:
+        sleep_random(max_time=3)
         # 获取赛程信息
-        schedule = get_schedule(date=date, use_selenium=use_selenium)      
+        schedule = get_schedule(date=date)      
         if schedule is None:
             continue
         

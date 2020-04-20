@@ -13,6 +13,7 @@ import re
 import os
 
 from data_handler import map_team, format_player_stats
+from anti_spider import get_html, sleep_random
 
 
 def get_game_pros():
@@ -123,7 +124,8 @@ def get_game_data(game_id):
     boxscore_url = 'https://nba.hupu.com/games/boxscore/'
     url = boxscore_url + game_id
     
-    html = urlopen(url)
+    #html = urlopen(url)
+    html = get_html(url)
     soup = BeautifulSoup(html, features='lxml')
 
     game = soup.find('div', {'class': 'gamecenter_content_l'})
@@ -158,6 +160,9 @@ def write_game_data(path, dir_name,
         
 
 def game_spider(path, game):
+    # 随机休眠 0~1s
+    #sleep_random(max_time=1)
+
     if game['gameOver']:
         # 比赛已经结束, 做技术统计
         base, team_score, player_score, recap = get_game_data(game['gameId'])
