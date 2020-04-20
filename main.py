@@ -74,11 +74,11 @@ def init_data():
         # 初始化数据库时
         os.remove('./data/games/all_schedule.csv')
     
-    dates = gen_dates_by_year(2019)[31:60]
-    schedule_spider(dates)
+    dates = gen_dates_by_year(2019)[:30]
+    schedule_spider(dates, use_selenium=True)
 
 """
-    爬取所有数据并更新到数据库，保证只执行一次
+    初始化操作，保证只执行一次
 """
 def init_all():
     init_dir()      # 清空data文件夹

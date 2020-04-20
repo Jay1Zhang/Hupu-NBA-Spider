@@ -57,7 +57,7 @@ def game2mysql(path):
     # df2sql
     csv2mysql(game_base_info, 'game', 32)
     csv2mysql(team_score_stats, 'team_score_stats', 8)
-    csv2mysql(player_score_stats, 'player_score_stats', 16)
+    csv2mysql(player_score_stats, 'player_score_stats', 32)
 
     try:
         game_recap = pd.read_csv(path + 'game_recap.csv')

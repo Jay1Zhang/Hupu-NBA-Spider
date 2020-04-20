@@ -5,6 +5,7 @@
 # @description: 爬取比赛相关信息
 
 from bs4 import BeautifulSoup
+from selenium import webdriver
 from urllib.request import urlopen
 from urllib.request import urlretrieve
 import pandas as pd
@@ -97,19 +98,6 @@ def get_player_score_stats(game, gameId):
     
     return pd.concat([away_team, home_team])
 
-"""
-def get_team_score_table(game, is_home_team):
-    team_id = 'J_home_content' if is_home_team else 'J_away_content'
-    
-    table = []
-    for tr in game.find('table', {'id': team_id}).find_all('tr'):
-        line = [td.get_text().strip() for td in tr.find_all('td')]
-        table.append(line)
-    
-    df = pd.DataFrame(table)
-    df.iloc[0,1] = "位置"
-    return df
-"""
 
 def get_game_recap(game, game_id):
     recap_url = game.find('a', {'class': 'a', 'target': '_self'})['href']
@@ -137,7 +125,7 @@ def get_game_data(game_id):
     
     html = urlopen(url)
     soup = BeautifulSoup(html, features='lxml')
-    
+
     game = soup.find('div', {'class': 'gamecenter_content_l'})
     game_base_info = get_game_base_info(game, game_id)
     team_score_stats = get_team_score_stats(game, game_id)
