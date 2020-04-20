@@ -146,4 +146,4 @@ if __name__ == "__main__":
     #game2mysql(path)
     #team2mysql()
     clear_mysql()
-    schedule2mysql(['2019-07-06'])
+    schedule2mysql()
