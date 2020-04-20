@@ -28,7 +28,10 @@ def get_schedule(date):
 
         return True
     
-    html = get_html(date)
+    schedule_url = 'https://nba.hupu.com/schedule/'
+    url = schedule_url + date
+    
+    html = get_html(url)
     soup = BeautifulSoup(html, features='lxml')
     players_table = soup.find("table", {"class": "players_table"})
     if not check_data(players_table):
@@ -76,7 +79,7 @@ def write_schedule(schedule, date, path='./data/games/'):
     df.to_csv(path + date + '/' + date + '-schedule.csv', index=False)
 
 
-def schedule_spider(dates, use_selenium=False):
+def schedule_spider(dates):
     path = './data/games/'
     all_schedule = []
     for date in dates:
@@ -100,9 +103,5 @@ def schedule_spider(dates, use_selenium=False):
         df.to_csv(path + 'all_schedule.csv', index=False, header=True)    # 写入所有赛程信息
 
 
-def main():
-    schedule_spider(gen_dates_by_year(2019)[364:])
-
-
 if __name__ == "__main__":
-    main()    
+    schedule_spider(gen_dates_by_year(2019)[364:]) 

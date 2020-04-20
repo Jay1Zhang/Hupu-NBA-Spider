@@ -9,7 +9,7 @@ import shutil
 import datetime
 import pandas as pd
 
-from data_generator import gen_dates_by_year
+from data_generator import gen_dates_by_year, gen_dates_by_month
 from schedule_spider import schedule_spider
 from team_spider import team_spider
 from mysql_updater import team2mysql, schedule2mysql, game2mysql, clear_mysql, set_default_primary
@@ -74,8 +74,9 @@ def init_data():
         # 初始化数据库时
         os.remove('./data/games/all_schedule.csv')
     
-    dates = gen_dates_by_year(2019)[:30]
-    schedule_spider(dates, use_selenium=True)
+    #dates = gen_dates_by_year(2019)
+    dates = gen_dates_by_month(2019, 1)
+    schedule_spider(dates)
 
 """
     初始化操作，保证只执行一次
@@ -87,8 +88,8 @@ def init_all():
 
 
 if __name__ == "__main__":
-    #init_all()
+    #init_all()  # 1
+    update_dates(gen_dates_by_month(2019, 2))   # 2~12
     #update_today()
-    #update_dates(['2019-02-21'])
-    init_mysql()
+    #init_mysql()
     #clear_mysql()
