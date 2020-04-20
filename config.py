@@ -1,6 +1,6 @@
 # mysql config
 username = 'root'
-password = 'king33++'
+password = 'ur_password'
 database = 'project_Hupu'
 
 # 爬取策略
