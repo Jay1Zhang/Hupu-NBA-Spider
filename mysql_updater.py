@@ -78,10 +78,14 @@ def schedule2mysql(dates):
             print('[schedule2mysql] There were no games on ' + date + ', skip.')
         else:
             for i in range(0, len(schedule)):
-                gameTeam = schedule.iloc[i]['gameTeam']
-                filepath = path + gameTeam + '/'
-                print(filepath)
-                game2mysql(filepath)
+                if schedule.iloc[i]['gameOver']:
+                    gameTeam = schedule.iloc[i]['gameTeam']
+                    filepath = path + gameTeam + '/'
+                    print(filepath)
+                    game2mysql(filepath)
+                else:
+                    # e.g. 2019-07-06
+                    pass
 
 
 def team2mysql():
@@ -142,4 +146,4 @@ if __name__ == "__main__":
     #game2mysql(path)
     #team2mysql()
     clear_mysql()
-    schedule2mysql(['2019-02-30', '2019-03-01'])
+    schedule2mysql(['2019-07-06'])

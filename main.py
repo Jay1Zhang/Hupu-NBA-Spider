@@ -20,7 +20,7 @@ from mysql_updater import team2mysql, schedule2mysql, game2mysql, clear_mysql, s
 """
 def update_dates(dates):
     schedule_spider(dates)
-    schedule2mysql(dates)
+    #schedule2mysql(dates)
 
 
 def update_today():
@@ -40,28 +40,6 @@ def init_dir():
     os.mkdir('./data/teams')
     os.mkdir('./data/players')
 
-"""
-    初始化MySQL数据库，保证在数据库为空时执行且仅执行一次。
-"""
-def init_mysql():
-    # 清空数据库
-    clear_mysql()
-    # 初始化队伍数据
-    team2mysql()
-    # 初始化比赛数据
-    path = './data/games/'
-    all_schedule = pd.read_csv(path + 'all_schedule.csv')
-    all_schedule.drop_duplicates()
-
-    for i in range(0, len(all_schedule)):
-        gameTime = all_schedule.iloc[i]['gameTime'].split(" ")[0]
-        gameTeam = all_schedule.iloc[i]['gameTeam']
-        filepath = path + gameTime + '/' + gameTeam + '/'
-        print(filepath)
-        game2mysql(filepath)
-
-    # 手动设置各表的主键
-    set_default_primary()
 
 """
     爬取所有数据，保证只执行一次
@@ -78,6 +56,35 @@ def init_data():
     dates = gen_dates_by_month(2019, 1)
     schedule_spider(dates)
 
+
+"""
+    初始化MySQL数据库，保证在数据库为空时执行且仅执行一次。
+"""
+def init_mysql():
+    # 清空数据库
+    clear_mysql()
+    # 初始化队伍数据
+    team2mysql()
+    # 初始化比赛数据
+    path = './data/games/'
+    all_schedule = pd.read_csv(path + 'all_schedule.csv')
+    all_schedule.drop_duplicates()
+
+    for i in range(0, len(all_schedule)):
+        if all_schedule.iloc[i]['gameOver']:
+            gameTime = all_schedule.iloc[i]['gameTime'].split(" ")[0]
+            gameTeam = all_schedule.iloc[i]['gameTeam']
+            filepath = path + gameTime + '/' + gameTeam + '/'
+            print(filepath)
+            game2mysql(filepath)
+        else:
+            # e.g. 2019-07-06
+            pass
+
+    # 手动设置各表的主键
+    set_default_primary()
+
+
 """
     初始化操作，保证只执行一次
 """
@@ -89,7 +96,8 @@ def init_all():
 
 if __name__ == "__main__":
     #init_all()  # 1
-    update_dates(gen_dates_by_month(2019, 2))   # 2~12
+    #update_dates(gen_dates_by_month(2020, 4))   # 2~12
     #update_today()
-    #init_mysql()
+    init_mysql()
     #clear_mysql()
+    #schedule2mysql(gen_dates_by_month(2019, 7))
