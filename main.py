@@ -74,7 +74,7 @@ def init_data():
         # 初始化数据库时
         os.remove('./data/games/all_schedule.csv')
     
-    dates = gen_dates_by_year(2019)
+    dates = gen_dates_by_year(2019)[31:60]
     schedule_spider(dates)
 
 """
@@ -87,7 +87,8 @@ def init_all():
 
 
 if __name__ == "__main__":
-    init_all()
+    #init_all()
     #update_today()
     #update_dates(['2019-02-21'])
-    #init_mysql()
+    init_mysql()
+    #clear_mysql()

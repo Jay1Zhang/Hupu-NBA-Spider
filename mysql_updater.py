@@ -107,11 +107,11 @@ def clear_mysql():
     db = pymysql.connect("localhost", username, password, database)
     cursor = db.cursor()    # 使用cursor()方法获取操作游标 
     try:
-        cursor.execute("drop table team")
-        cursor.execute("drop table game")
-        cursor.execute("drop table team_score_stats")
-        cursor.execute("drop player_score_stats team")
-        cursor.execute("drop table recap")
+        cursor.execute("drop table team;")
+        cursor.execute("drop table game;")
+        cursor.execute("drop table team_score_stats;")
+        cursor.execute("drop table player_score_stats;")
+        cursor.execute("drop table recap;")
         db.commit()
         # print("Cleared tables in " + database)                  
     except:
@@ -130,11 +130,6 @@ def set_default_primary():
         cursor.execute("ALTER TABLE team_score_stats ADD PRIMARY KEY (id);")
         cursor.execute("ALTER TABLE player_score_stats ADD PRIMARY KEY (id);")
         cursor.execute("ALTER TABLE recap ADD PRIMARY KEY (gameId);")
-
-        cursor.execute("drop table game")
-        cursor.execute("drop table team_score_stats")
-        cursor.execute("drop player_score_stats team")
-        cursor.execute("drop table recap")
         db.commit()
         # print("Cleared tables in " + database)                  
     except:
@@ -146,4 +141,5 @@ if __name__ == "__main__":
     #path = './data/games/2019-12-22/ATLvsBKN/'
     #game2mysql(path)
     #team2mysql()
-    schedule2mysql(['2019-12-30', '2019-12-31'])
+    clear_mysql()
+    schedule2mysql(['2019-02-30', '2019-03-01'])

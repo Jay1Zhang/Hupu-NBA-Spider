@@ -88,7 +88,7 @@ def schedule_spider(dates):
     for date in dates:
         """sleep"""
         cnt += 1
-        if cnt == 30:
+        if cnt == 15:
             # 每爬取30天的赛程强行休息一分钟
             cnt = 0
             time.sleep(60)
