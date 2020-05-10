@@ -83,7 +83,8 @@ def schedule_spider(dates):
     path = './data/games/'
     all_schedule = []
     for date in dates:
-        sleep_random(max_time=3)
+        # 随机休眠 0~3s
+        #sleep_random(max_time=3)
         # 获取赛程信息
         schedule = get_schedule(date=date)      
         if schedule is None:

@@ -95,10 +95,11 @@ def futureGame2mysql(game):
         game.columns[4]: Float(precision=6, asdecimal=True),
         game.columns[5]: Float(precision=6, asdecimal=True),
     }
+
     try:
         game.to_sql(name='future_game', con=con, if_exists='append', index=False, dtype=dtype_dict)
     except:
-        print('[futureGame2mysql] game ' + game['gameId'] + ' has existed, skip.')
+        print('[futureGame2mysql] game ' + str(game['gameId']) + ' has existed, skip.')
 
 
 def dropFutureGame4mysql(gameId):
