@@ -12,7 +12,7 @@ import pandas as pd
 from data_generator import gen_dates_by_year, gen_dates_by_month
 from schedule_spider import schedule_spider
 from team_spider import team_spider
-from mysql_updater import team2mysql, schedule2mysql, game2mysql, clear_mysql, set_default_primary
+from mysql_updater import team2mysql, schedule2mysql, game2mysql, futureGame2mysql, clear_mysql, set_default_primary
 
 
 """
@@ -79,6 +79,8 @@ def init_mysql():
             game2mysql(filepath)
         else:
             # e.g. 2019-07-06
+            print('[init_mysql] Games were postponed, import into future_game table.')
+            futureGame2mysql(all_schedule.iloc[i])
             pass
 
     # 手动设置各表的主键

@@ -66,6 +66,33 @@ def game2mysql(path):
     else:
         recap2mysql(game_recap)
 
+
+def futureGame2mysql(game):
+    game = pd.DataFrame(game).T
+    game['awayTeam'] = "nan"
+    game['homeTeam'] = "nan"
+    game['away_win_rate'] = 0.0
+    game['home_win_rate'] = 0.0
+
+    gameTeam = game.iloc[0]['gameTeam']
+    gameTeam = gameTeam.split("vs")
+    game['awayTeam'] = gameTeam[0]
+    game['homeTeam'] = gameTeam[1]
+
+    game.drop(columns=['gameOver','gameTeam'], axis=1, inplace=True)
+    game['gameId'] = game['gameId'].astype(int)
+
+    dtype_dict = {
+        game.columns[0]: Integer(),
+        game.columns[1]: NVARCHAR(length=32),
+        game.columns[2]: NVARCHAR(length=3), 
+        game.columns[3]: NVARCHAR(length=3), 
+        game.columns[4]: Float(precision=6, asdecimal=True),
+        game.columns[5]: Float(precision=6, asdecimal=True),
+    }
+    game.to_sql(name='future_game', con=con, if_exists='append', index=False, dtype=dtype_dict)
+
+
 """
     将指定日期的所有比赛数据更新到MySQL
 """
@@ -85,7 +112,8 @@ def schedule2mysql(dates):
                     game2mysql(filepath)
                 else:
                     # e.g. 2019-07-06
-                    pass
+                    print('[schedule2mysql] Games were postponed, import into future_game table.')
+                    futureGame2mysql(schedule.iloc[i])
 
 
 def team2mysql():
@@ -116,6 +144,7 @@ def clear_mysql():
         cursor.execute("drop table team_score_stats;")
         cursor.execute("drop table player_score_stats;")
         cursor.execute("drop table recap;")
+        cursor.execute("drop table future_game;")
         db.commit()
         # print("Cleared tables in " + database)                  
     except:
@@ -134,6 +163,7 @@ def set_default_primary():
         cursor.execute("ALTER TABLE team_score_stats ADD PRIMARY KEY (id);")
         cursor.execute("ALTER TABLE player_score_stats ADD PRIMARY KEY (id);")
         cursor.execute("ALTER TABLE recap ADD PRIMARY KEY (gameId);")
+        cursor.execute("ALTER TABLE future_game ADD PRIMARY KEY (gameId);")
         db.commit()
         # print("Cleared tables in " + database)                  
     except:
@@ -145,5 +175,6 @@ if __name__ == "__main__":
     #path = './data/games/2019-12-22/ATLvsBKN/'
     #game2mysql(path)
     #team2mysql()
-    clear_mysql()
-    schedule2mysql()
+    #clear_mysql()
+    #schedule2mysql()
+    pass
