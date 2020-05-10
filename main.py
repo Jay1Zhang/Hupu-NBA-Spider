@@ -20,14 +20,15 @@ from mysql_updater import team2mysql, schedule2mysql, game2mysql, futureGame2mys
 """
 def update_dates(dates):
     schedule_spider(dates)
-    #schedule2mysql(dates)
+    schedule2mysql(dates)
 
 
 def update_today():
     today = str(datetime.date.today())
     print(today)
-    schedule_spider([today])
-    schedule2mysql([today])
+    update_dates([today])
+    #schedule_spider([today])
+    #schedule2mysql([today])
 
 """
     初始化data文件夹，该操作非常危险，保证只执行一次
@@ -100,6 +101,7 @@ if __name__ == "__main__":
     #init_all()  # 1
     #update_dates(gen_dates_by_month(2020, 4))   # 2~12
     #update_today()
-    init_mysql()
+    update_dates(['2020-04-01'])
+    #init_mysql()
     #clear_mysql()
     #schedule2mysql(gen_dates_by_month(2019, 7))

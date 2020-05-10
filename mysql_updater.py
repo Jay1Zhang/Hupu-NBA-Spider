@@ -29,7 +29,10 @@ def csv2mysql(df, table_name, length):
             dtype_dict.update({i: Integer()})
     
     # 通过dtype设置类型 为dict格式{“col_name”:type}
-    df.to_sql(name=table_name, con=con, if_exists='append', index=False, dtype=dtype_dict)
+    try:
+        df.to_sql(name=table_name, con=con, if_exists='append', index=False, dtype=dtype_dict)
+    except:
+        print('[csv2mysql] Insert data repeatedly, skip.')
 
 
 def recap2mysql(recap):
@@ -42,8 +45,10 @@ def recap2mysql(recap):
     }
     
     # 通过dtype设置类型 为dict格式{"col_name":type}
-    recap.to_sql(name='recap', con=con, if_exists='append', index=False, dtype=dtype_dict)
-
+    try:
+        recap.to_sql(name='recap', con=con, if_exists='append', index=False, dtype=dtype_dict)
+    except:
+        print('[recap2mysql] Insert data repeatedly, skip.')
 
 """
     将指定比赛的数据更新到MySQL
@@ -90,7 +95,23 @@ def futureGame2mysql(game):
         game.columns[4]: Float(precision=6, asdecimal=True),
         game.columns[5]: Float(precision=6, asdecimal=True),
     }
-    game.to_sql(name='future_game', con=con, if_exists='append', index=False, dtype=dtype_dict)
+    try:
+        game.to_sql(name='future_game', con=con, if_exists='append', index=False, dtype=dtype_dict)
+    except:
+        print('[futureGame2mysql] game ' + game['gameId'] + ' has existed, skip.')
+
+
+def dropFutureGame4mysql(gameId):
+    # 打开数据库连接
+    db = pymysql.connect("localhost", username, password, database)
+    cursor = db.cursor()    # 使用cursor()方法获取操作游标 
+    try:
+        cursor.execute("DELETE FROM future_game where gameId=" + gameId)
+        db.commit()
+        print("[dropFutureGame4mysql] drop game: " + gameId + " from table future_game.")                  
+    except:
+        db.rollback()   # 发生错误时回滚
+    db.close()
 
 
 """
@@ -110,6 +131,7 @@ def schedule2mysql(dates):
                     filepath = path + gameTeam + '/'
                     print(filepath)
                     game2mysql(filepath)
+                    dropFutureGame4mysql(schedule.iloc[i]['gameId'])
                 else:
                     # e.g. 2019-07-06
                     print('[schedule2mysql] Games were postponed, import into future_game table.')
